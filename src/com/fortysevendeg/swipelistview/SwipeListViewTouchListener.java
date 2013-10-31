@@ -323,7 +323,9 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
      * @param position Position of list
      */
     protected void openAnimate(int position) {
-        openAnimate(swipeListView.getChildAt(position - swipeListView.getFirstVisiblePosition()).findViewById(swipeFrontView), position);
+        openAnimate(swipeListView.getChildAt(position - swipeListView.getFirstVisiblePosition()).findViewById(swipeFrontView),
+        		swipeListView.getChildAt(position - swipeListView.getFirstVisiblePosition()).findViewById(swipeBackView),
+        		position);
     }
 
     /**
@@ -332,7 +334,10 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
      * @param position Position of list
      */
     protected void closeAnimate(int position) {
-        closeAnimate(true, swipeListView.getChildAt(position - swipeListView.getFirstVisiblePosition()).findViewById(swipeFrontView), position);
+        closeAnimate(true, 
+        		swipeListView.getChildAt(position - swipeListView.getFirstVisiblePosition()).findViewById(swipeFrontView),
+        		swipeListView.getChildAt(position - swipeListView.getFirstVisiblePosition()).findViewById(swipeBackView),
+        		position);
     }
 
     /**
@@ -452,24 +457,35 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
     /**
      * Open item
      *
-     * @param view     affected view
+     * @param frontview     affected view
      * @param position Position of list
      */
-    private void openAnimate(View view, int position) {
+    private void openAnimate(View frontview, View backview, int position) {
         if (!opened.get(position)) {
-            generateRevealAnimate(true, view, true, false, position);
+        	if(swipeCurrentAction == SwipeListView.SWIPE_ACTION_REVEAL_NO_ANIM){
+                generateRevealNoAnimate(true, frontview, backview, true, false, position);
+        	} else{
+                generateRevealAnimate(true, frontview, true, false, position);
+        	}
         }
     }
 
     /**
      * Close item
      *
-     * @param view     affected view
+     * @param frontview     affected view
      * @param position Position of list
      */
-    private void closeAnimate(boolean isResetScrolling, View view, int position) {
+    private void closeAnimate(boolean isResetScrolling, View frontview, View backview, int position) {
+
+    	Log.e("SwipeListView","closeAnimate");
         if (opened.get(position)) {
-            generateRevealAnimate(isResetScrolling, view, true, false, position);
+        	if(swipeActionLeft == SwipeListView.SWIPE_ACTION_REVEAL_NO_ANIM &&
+        			swipeActionRight == SwipeListView.SWIPE_ACTION_REVEAL_NO_ANIM){
+                generateRevealNoAnimate(isResetScrolling, frontview, backview, true, false, position);
+        	} else{
+        		generateRevealAnimate(isResetScrolling, frontview, true, false, position);
+        	}
         }
     }
 
@@ -494,7 +510,7 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
         
         if (swipeCurrentAction == SwipeListView.SWIPE_ACTION_REVEAL_NO_ANIM){
         	Log.e("generateAnimate", "SWIPE_ACTION_REVEAL_NO_ANIM");
-        	generateRevealNoAnimate(true, frontView, backView, swap, swapRight, position);
+        	generateRevealNoAnimate(true, view, backView, swap, swapRight, position);
         }
         
         if (swipeCurrentAction == SwipeListView.SWIPE_ACTION_CHOICE) {
@@ -577,7 +593,7 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
     private void generateRevealNoAnimate(
     		final boolean isResetScrolling, final View frontView, final View backView, 
     		final boolean swap, final boolean swapRight, final int position){
-
+    	Log.e("generateRevealNoAnimate", "go to function");
     	if (swap) {
     		if (opened.get(position)) {
             	Log.e("generateRevealNoAnimate", "close back view");
@@ -689,6 +705,8 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
 
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+
+            	Log.e("SwipeListView","onScrollStateChanged: "+ scrollState);
                 setEnabled(scrollState != AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL);
                 if (swipeClosesAllItemsWhenListMoves && scrollState == SCROLL_STATE_TOUCH_SCROLL) {
                     closeOpenedItems(true);
@@ -711,7 +729,8 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                
+
+            	Log.e("SwipeListView","onScroll");
             	if (isFirstItem) {
                     boolean onSecondItemList = firstVisibleItem == 1;
                     if (onSecondItemList) {
@@ -744,12 +763,16 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
      * Close all opened items
      */
     public void closeOpenedItems(boolean resetScrolling) {
+    	Log.e("SwipeListView","closeOpenedItems");
         if (opened != null) {
             int start = swipeListView.getFirstVisiblePosition();
             int end = swipeListView.getLastVisiblePosition();
             for (int i = start; i <= end; i++) {
                 if (opened.get(i)) {
-                    closeAnimate(resetScrolling, swipeListView.getChildAt(i - start).findViewById(swipeFrontView), i);
+                    closeAnimate(resetScrolling,
+                    		swipeListView.getChildAt(i - start).findViewById(swipeFrontView),
+                    		swipeListView.getChildAt(i - start).findViewById(swipeBackView),
+                    		i);
                 }
             }
         }
@@ -925,8 +948,8 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                         	swipeCurrentAction = SwipeListView.SWIPE_ACTION_REVEAL;
                         }
                     } else {
-                    	closeAllOpenedItem();
-                    	
+//                    	closeAllOpenedItem();
+                    	closeOpenedItems(false);
                         if (swipingRight && swipeActionRight == SwipeListView.SWIPE_ACTION_DISMISS) {
                             swipeCurrentAction = SwipeListView.SWIPE_ACTION_DISMISS;
                         } else if (!swipingRight && swipeActionLeft == SwipeListView.SWIPE_ACTION_DISMISS) {
