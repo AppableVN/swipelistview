@@ -264,6 +264,10 @@ public class SwipeListView extends ListView {
         return touchListener.getPositionsSelected();
     }
 
+    public List<Integer> getOpened(){
+    	return touchListener.getOpened();
+    }
+    
     /**
      * Count selected
      *

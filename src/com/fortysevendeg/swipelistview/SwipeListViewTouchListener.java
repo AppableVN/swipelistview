@@ -101,6 +101,17 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
     private int oldSwipeActionRight;
     private int oldSwipeActionLeft;
 
+    
+    public List<Integer> getOpened(){
+    	List<Integer> list = new ArrayList<Integer>();
+    	for(int i = 0; i< opened.size(); i++){
+    		if(opened.get(i)){
+    			list.add(i);
+    		}
+    	}
+    	return list;
+    }
+    
     /**
      * Constructor
      *
@@ -606,6 +617,7 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
     			frontView.setEnabled(false);
     			backView.setVisibility(View.VISIBLE);
         	}
+    		
 		}
 
     	if(isResetScrolling)
@@ -814,6 +826,11 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                 int childCount = swipeListView.getChildCount();
                 int[] listViewCoords = new int[2];
                 swipeListView.getLocationOnScreen(listViewCoords);
+                int topLv = 0;
+                int bottomLv  = swipeListView.getHeight();
+                Log.e("SwipeListViewTouchListener", "rect top of listview: " + topLv);
+            	Log.e("SwipeListViewTouchListener", "rect bottom of listview: " + bottomLv);
+                
                 int x = (int) motionEvent.getRawX() - listViewCoords[0];
                 int y = (int) motionEvent.getRawY() - listViewCoords[1];
                 View child;
@@ -827,6 +844,19 @@ public class SwipeListViewTouchListener implements View.OnTouchListener {
                     boolean allowSwipe = swipeListView.getAdapter().isEnabled(childPosition) && swipeListView.getAdapter().getItemViewType(childPosition) >= 0;
 
                     if (allowSwipe && rect.contains(x, y)) {
+//                    	if(rect.bottom > bottomLv){
+////	                		swipeListView.smoothScrollBy(rect.bottom - bottomLv + 5, 100);
+//                    		swipeListView.scrollBy(0, rect.bottom - bottomLv + 5);
+//	                	}
+//                    	if(rect.top < 0){
+////                    		swipeListView.smoothScrollBy(rect.top - 5, 100);
+//                    		swipeListView.scrollBy(0, rect.top - 5);
+//                    	}
+//                    	
+                    	
+                    	
+                    	Log.e("SwipeListViewTouchListener", "rect top of child at " + childPosition + ": " + rect.top);
+                    	Log.e("SwipeListViewTouchListener", "rect bottom of child at " + childPosition + ": " + rect.bottom);
                         setParentView(child);
                         setFrontView(child.findViewById(swipeFrontView));
 
